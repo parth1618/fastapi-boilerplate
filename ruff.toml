@@ -1,0 +1,46 @@
+# Ruff configuration
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "W",   # pycodestyle warnings
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "A",   # flake8-builtins
+  "C4",  # flake8-comprehensions
+  "DTZ", # flake8-datetimez
+  "T10", # flake8-debugger
+  "EM",  # flake8-errmsg
+  "ISC", # flake8-implicit-str-concat
+  "ICN", # flake8-import-conventions
+  "PIE", # flake8-pie
+  "PT",  # flake8-pytest-style
+  "Q",   # flake8-quotes
+  "RSE", # flake8-raise
+  "RET", # flake8-return
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  "ERA", # eradicate
+  "PL",  # pylint
+  "RUF", # ruff-specific rules
+]
+
+ignore = [
+  "E501",    # line too long (handled by formatter)
+  "PLR0913", # too many arguments
+  "PLR2004", # magic value comparison
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"] # unused imports
+"tests/*" = ["PLR2004"]  # magic values in tests are ok
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

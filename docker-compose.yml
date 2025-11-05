@@ -1,0 +1,118 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fastapi_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: fastapi_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.51
+    container_name: fastapi_jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Collector HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - backend
+  
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: fastapi_otel_collector
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yml
+    ports:
+      - "4319:4317"  # OTLP gRPC (for FastAPI app running on host)
+      - "4320:4318"  # OTLP HTTP
+      - "8889:8889"  # Prometheus metrics endpoint (changed from 8888)
+    command: ["--config=/etc/otelcol-contrib/config.yml"]
+    depends_on:
+      - jaeger
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fastapi_prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    depends_on:
+      - otel-collector
+    networks:
+      - backend
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: fastapi_app
+  #   environment:
+  #     ENVIRONMENT: production
+  #     DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/appdb
+  #     REDIS_URL: redis://redis:6379/0
+  #     JWT_SECRET_KEY: your-super-secret-jwt-key-change-in-production
+  #     JWT_ALGORITHM: HS256
+  #     ACCESS_TOKEN_EXPIRE_MINUTES: 30
+  #     CORS_ORIGINS: http://localhost:3000,http://localhost:8080
+  #     LOG_LEVEL: INFO
+  #     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     otel-collector:
+  #       condition: service_started
+  #   command: >
+  #     sh -c "
+  #       alembic upgrade head &&
+  #       gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000 --workers 4 --timeout 120
+  #     "
+  #   networks:
+  #     - backend
+  #   restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
