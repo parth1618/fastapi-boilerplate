@@ -1,6 +1,6 @@
 # FastAPI Boilerplate - Complete Setup Guide
 
-This comprehensive guide will walk you through setting up the FastAPI boilerplate from scratch to a fully functional development environment.
+This comprehensive guide will walk you through setting up the FastAPI Boilerplate from scratch to a fully functional development environment.
 
 ---
 

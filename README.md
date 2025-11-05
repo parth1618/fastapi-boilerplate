@@ -29,7 +29,7 @@ A complete, production-ready FastAPI backend boilerplate with modern best practi
 
 ## 🎯 Overview
 
-This FastAPI boilerplate provides a **production-ready foundation** for building modern REST APIs. It implements **clean architecture principles**, comprehensive security features, and enterprise-grade observability out of the box.
+This FastAPI Boilerplate provides a **production-ready foundation** for building modern REST APIs. It implements **clean architecture principles**, comprehensive security features, and enterprise-grade observability out of the box.
 
 ### What Is This?
 
