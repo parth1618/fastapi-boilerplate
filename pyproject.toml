@@ -49,10 +49,15 @@ mypy = "^1.9.0"
 pre-commit = "^3.7.0"
 types-passlib = "^1.7.7"
 types-redis = "^4.6.0"
+pytest-cov = "^5.0"  # ← ADDED for --cov flags
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# ————————————————————————
+# TOOL CONFIGURATIONS
+# ————————————————————————
 
 [tool.ruff]
 line-length = 100
@@ -60,44 +65,52 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-  "E",
-  "F",
-  "I",
-  "N",
-  "W",
-  "UP",
-  "B",
-  "A",
-  "C4",
-  "DTZ",
-  "T10",
-  "EM",
-  "ISC",
-  "ICN",
-  "PIE",
-  "PT",
-  "Q",
-  "RSE",
-  "RET",
-  "SIM",
-  "TID",
-  "ERA",
-  "PL",
-  "RUF",
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "W",   # pycodestyle warnings
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "A",   # flake8-builtins
+  "C4",  # flake8-comprehensions
+  "DTZ", # flake8-datetimez
+  "T10", # flake8-debugger
+  "EM",  # flake8-errmsg
+  "ISC", # flake8-implicit-str-concat
+  "ICN", # flake8-import-conventions
+  "PIE", # flake8-pie
+  "PT",  # flake8-pytest-style
+  "Q",   # flake8-quotes
+  "RSE", # flake8-raise
+  "RET", # flake8-return
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  "ERA", # eradicate
+  "PL",  # pylint
+  "RUF", # ruff-specific rules
 ]
 ignore = [
-  "E501",    # Line too long (handled by formatter)
-  "PLR0913", # Too many arguments
-  "PLR2004", # Magic value
+  "E501",    # line too long (handled by formatter)
+  "PLR0913", # too many arguments
+  "PLR2004", # magic value comparison
   "EM101",
-  "ISC001",  # Fixes the formatter conflict warning
+  "ISC001",  # conflicts with formatter
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports
+"tests/*" = ["PLR2004"]   # magic values in tests
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+# ————————————————————————
+# MYPY
+# ————————————————————————
 
 [tool.mypy]
 python_version = "3.11"
@@ -115,12 +128,48 @@ strict_equality = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["slowapi.*", "loguru.*"]
+module = [
+  "slowapi.*",
+  "loguru.*",
+  "alembic.*"
+]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# ————————————————————————
+# PYTEST
+# ————————————————————————
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=app --cov-report=xml --cov-report=term-missing"
+
+# ————————————————————————
+# COVERAGE
+# ————————————————————————
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.paths]
+combine = ["app"]
+
+[tool.coverage.report]
+fail_under = 0        # Set to 80+ later to enforce coverage
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "raise AssertionError",
+  "raise ImportError"
+]
