@@ -1,4 +1,4 @@
-# FastAPI Production Boilerplate
+# FastAPI Boilerplate
 
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-green)
