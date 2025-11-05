@@ -1714,13 +1714,13 @@ If you find this project helpful:
 
 <div align="center">
 
-**[⬆ Back to Top](#fastapi-production-boilerplate)**
+**[⬆ Back to Top](#fastapi-boilerplate)**
 
 ---
 
 Made with ❤️ by the FastAPI Boilerplate Team
 
-**FastAPI Production Boilerplate** • Version 1.0.0 • [MIT License](LICENSE)
+**FastAPI Boilerplate** • Version 1.0.0 • [MIT License](LICENSE)
 
 [Documentation](SETUP.md) • [Contributing](CONTRIBUTING.md) • [Issues](https://github.com/parth1618/fastapi-boilerplate/issues) • [Discussions](https://github.com/parth1618/fastapi-boilerplate/discussions)
 
