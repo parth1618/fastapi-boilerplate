@@ -5,6 +5,7 @@ description = "Production-ready FastAPI backend boilerplate"
 authors = ["Parth Joshi <parthjoshi.1618@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
