@@ -68,7 +68,13 @@ format-check: ## Check formatting without making changes
 	poetry run ruff format . --check
 
 typecheck: ## Type check with mypy
-	poetry run mypy .
+	rm -rf .mypy_cache || true
+	poetry run mypy \
+	    --config-file=pyproject.toml \
+	    --install-types \
+	    --non-interactive \
+	    --exclude '^(tests/|alembic/)' \
+	    .
 
 # ═══════════════════════════════════════════════════════════
 # SECURITY

@@ -61,6 +61,3 @@ docker-compose.yml
 
 # Misc
 .DS_Store
-
-# Secrets
-.secrets.baseline

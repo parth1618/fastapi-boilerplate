@@ -72,6 +72,3 @@ migrations/versions/*.py
 
 # # Poetry
 # poetry.lock
-
-# Secrets
-.secrets.baseline

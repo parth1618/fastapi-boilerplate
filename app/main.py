@@ -61,7 +61,7 @@ if settings.METRICS_ENABLED:
 # Add rate limit handler
 app.add_exception_handler(
     RateLimitExceeded,
-    _rate_limit_exceeded_handler,
+    _rate_limit_exceeded_handler,  # type: ignore[arg-type]
 )
 
 

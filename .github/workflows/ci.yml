@@ -50,7 +50,6 @@ jobs:
 
       - name: Run MyPy Type Checking
         run: poetry run mypy . --no-error-summary
-        continue-on-error: true
 
   test:
     name: Test Suite
@@ -156,15 +155,12 @@ jobs:
 
       - name: Run Bandit security checks
         run: poetry run bandit -c pyproject.toml -r app/
-        continue-on-error: true
 
       - name: Run detect-secrets
         run: poetry run detect-secrets scan --baseline .secrets.baseline
-        continue-on-error: true
 
       - name: Run Safety check
         run: poetry run safety check --json
-        continue-on-error: true
 
   build:
     name: Build Docker Image
@@ -278,7 +274,6 @@ jobs:
 
       - name: Run pre-commit
         run: poetry run pre-commit run --all-files --show-diff-on-failure
-        continue-on-error: true
 
   notify:
     name: Notification
