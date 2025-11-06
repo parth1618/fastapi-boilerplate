@@ -43,7 +43,7 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
     networks:
       - backend
-  
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: fastapi_otel_collector
@@ -75,38 +75,36 @@ services:
     networks:
       - backend
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fastapi_app
-  #   environment:
-  #     ENVIRONMENT: production
-  #     DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/appdb
-  #     REDIS_URL: redis://redis:6379/0
-  #     JWT_SECRET_KEY: your-super-secret-jwt-key-change-in-production
-  #     JWT_ALGORITHM: HS256
-  #     ACCESS_TOKEN_EXPIRE_MINUTES: 30
-  #     CORS_ORIGINS: http://localhost:3000,http://localhost:8080
-  #     LOG_LEVEL: INFO
-  #     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #     otel-collector:
-  #       condition: service_started
-  #   command: >
-  #     sh -c "
-  #       alembic upgrade head &&
-  #       gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000 --workers 4 --timeout 120
-  #     "
-  #   networks:
-  #     - backend
-  #   restart: unless-stopped
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    env_file: .env
+    environment:
+      # Override specific variables for Docker network communication
+      DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/appdb
+      REDIS_URL: redis://redis:6379/0
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000 --workers 4 --timeout 120
+      "
+    networks:
+      - backend
+    restart: unless-stopped
 
 networks:
   backend:

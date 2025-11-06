@@ -90,6 +90,7 @@ docker-compose up -d
 ```
 
 This command will:
+
 - ✅ Pull required Docker images
 - ✅ Start PostgreSQL database
 - ✅ Start Redis cache
@@ -211,6 +212,7 @@ poetry run python --version
 ### Step 4: Install PostgreSQL Locally
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
@@ -219,12 +221,14 @@ sudo systemctl enable postgresql
 ```
 
 **macOS (using Homebrew):**
+
 ```bash
 brew install postgresql@16
 brew services start postgresql@16
 ```
 
 **Create Database:**
+
 ```bash
 # Connect to PostgreSQL
 sudo -u postgres psql
@@ -239,6 +243,7 @@ GRANT ALL PRIVILEGES ON DATABASE appdb TO postgres;
 ### Step 5: Install Redis Locally
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt update
 sudo apt install redis-server
@@ -247,12 +252,14 @@ sudo systemctl enable redis-server
 ```
 
 **macOS (using Homebrew):**
+
 ```bash
 brew install redis
 brew services start redis
 ```
 
 **Verify Redis:**
+
 ```bash
 redis-cli ping
 # Should return: PONG
@@ -623,6 +630,7 @@ Create `.vscode/settings.json`:
 **Problem:** Port 8000 is already in use
 
 **Solution:**
+
 ```bash
 # Find process using port 8000
 lsof -i :8000
@@ -639,6 +647,7 @@ poetry run uvicorn app.main:app --reload --port 8001
 **Problem:** Cannot connect to PostgreSQL
 
 **Solution:**
+
 ```bash
 # Check if PostgreSQL is running
 docker-compose ps postgres
@@ -658,6 +667,7 @@ docker-compose restart postgres
 **Problem:** Cannot connect to Redis
 
 **Solution:**
+
 ```bash
 # Check if Redis is running
 docker-compose ps redis
@@ -677,6 +687,7 @@ docker-compose restart redis
 **Problem:** Alembic migration fails
 
 **Solution:**
+
 ```bash
 # View migration history
 poetry run alembic history
@@ -695,6 +706,7 @@ make migrate
 **Problem:** poetry.lock is out of sync
 
 **Solution:**
+
 ```bash
 # Update lock file
 poetry lock --no-update
@@ -709,6 +721,7 @@ poetry install
 **Problem:** Module not found errors
 
 **Solution:**
+
 ```bash
 # Ensure you're in the Poetry environment
 poetry shell
@@ -725,6 +738,7 @@ poetry run python -c "import sys; print(sys.path)"
 **Problem:** Docker build fails
 
 **Solution:**
+
 ```bash
 # Clean Docker cache
 docker system prune -a
@@ -946,6 +960,6 @@ fastapi-boilerplate/
 
 ---
 
-**Setup Version**: 1.0.0
+**Setup Version**: 1.1.0
 **Last Updated**: November 5, 2025
 **Maintained By**: FastAPI Boilerplate Team

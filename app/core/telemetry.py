@@ -1,6 +1,7 @@
 """OpenTelemetry tracing and metrics setup."""
 
 import structlog
+from fastapi import FastAPI
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -18,7 +19,7 @@ from app.core.config import settings
 logger = structlog.get_logger()
 
 
-def setup_telemetry(app) -> None:  # type: ignore[no-untyped-def]
+def setup_telemetry(app: FastAPI) -> None:
     """Configure OpenTelemetry tracing and metrics."""
     if not settings.OTEL_ENABLED:
         logger.info("opentelemetry_disabled")
@@ -60,7 +61,7 @@ def setup_telemetry(app) -> None:  # type: ignore[no-untyped-def]
         FastAPIInstrumentor.instrument_app(app)
 
         # Instrument SQLAlchemy
-        from app.db.session import engine  # noqa: PLC0415
+        from app.db.session import engine
 
         SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
 

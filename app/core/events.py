@@ -2,6 +2,7 @@
 
 import structlog
 from fastapi import FastAPI
+from sqlalchemy import text
 
 from app.core.config import settings
 from app.db.session import engine
@@ -24,7 +25,7 @@ async def on_startup(app: FastAPI) -> None:
     # Test database connection
     try:
         async with engine.begin() as conn:
-            await conn.execute("SELECT 1")  # type: ignore[arg-type]
+            await conn.execute(text("SELECT 1"))
         logger.info("database_connection_successful")
     except Exception as e:
         logger.error("database_connection_failed", error=str(e))

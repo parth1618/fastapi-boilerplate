@@ -1,6 +1,7 @@
 """Authentication dependencies."""
 
-from typing import Annotated
+from collections.abc import Callable, Coroutine
+from typing import Annotated, Any
 
 import structlog
 from fastapi import Depends, HTTPException, status
@@ -86,7 +87,7 @@ async def get_current_superuser(
     return current_user
 
 
-def require_role(*roles: str):  # type: ignore[no-untyped-def]
+def require_role(*roles: str) -> Callable[[User], Coroutine[Any, Any, User]]:
     """Dependency to check if user has required role."""
 
     async def role_checker(

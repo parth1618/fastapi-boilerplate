@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 import structlog
@@ -22,6 +23,16 @@ from app.utils.exceptions import AppException
 
 logger = structlog.get_logger()
 
+
+# Startup and shutdown events
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Application lifespan manager for startup and shutdown events."""
+    await on_startup(app)
+    yield
+    await on_shutdown(app)
+
+
 # Create FastAPI application
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,6 +40,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # Add rate limiter state
@@ -47,7 +59,10 @@ if settings.METRICS_ENABLED:
     app.add_middleware(PrometheusMiddleware)
 
 # Add rate limit handler
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
+)
 
 
 # Global exception handlers
@@ -107,15 +122,6 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal server error"},
     )
-
-
-# Startup and shutdown events
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan manager for startup and shutdown events."""
-    await on_startup(app)
-    yield
-    await on_shutdown(app)
 
 
 # Include API router

@@ -1,0 +1,198 @@
+repos:
+  # ═══════════════════════════════════════════════════════════
+  # BASIC FILE CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^tests/fixtures/
+      - id: end-of-file-fixer
+        exclude: ^tests/fixtures/
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-ast
+      - id: debug-statements
+      - id: name-tests-test
+        args: [--pytest-test-first]
+      - id: check-builtin-literals
+      - id: check-executables-have-shebangs
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ═══════════════════════════════════════════════════════════
+  # PYTHON CODE QUALITY
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.3
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --show-fixes]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: clear-mypy-cache
+        name: Clear mypy cache
+        entry: bash -c 'rm -rf .mypy_cache || true'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-passlib
+          - types-redis
+          - sqlalchemy[mypy]
+          - pydantic
+          - types-python-jose
+          - types-requests
+          - fastapi
+          - starlette
+          - pydantic-settings
+          - structlog
+          - prometheus-client
+          - pyjwt[crypto] # Covers "jwt" (PyJWT)
+          - tenacity
+          - circuitbreaker
+          - aiocache
+          - opentelemetry-api
+          - opentelemetry-sdk
+          - opentelemetry-instrumentation-fastapi
+          - opentelemetry-instrumentation-sqlalchemy
+          - opentelemetry-instrumentation-redis
+          - opentelemetry-exporter-otlp
+          # Optional but helpful for submodules
+          - opentelemetry-exporter-otlp-proto-grpc
+        args:
+          - --config-file=pyproject.toml
+          - --install-types
+          - --non-interactive
+        exclude: ^(tests/|alembic/)
+        language_version: python3
+
+  # ═══════════════════════════════════════════════════════════
+  # SECURITY CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml, -r, app/]
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - --baseline
+          - .secrets.baseline
+          - --exclude-files
+          - "poetry.lock"
+          - --exclude-files
+          - "package-lock.json"
+
+  # ═══════════════════════════════════════════════════════════
+  # PYTHON DEPENDENCY CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/python-poetry/poetry
+    rev: 2.2.1
+    hooks:
+      - id: poetry-check
+        language_version: python3
+
+  # ═══════════════════════════════════════════════════════════
+  # DOCKER CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint-docker
+        args:
+          - --ignore
+          - DL3008
+          - --ignore
+          - DL3013
+          - --ignore
+          - DL3059
+
+  # ═══════════════════════════════════════════════════════════
+  # YAML/CONFIG FILE CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        args: [-c=.yamllint.yml]
+
+  # ═══════════════════════════════════════════════════════════
+  # DOCUMENTATION CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        args: [--fix, --disable, MD013, MD036, MD040, MD051]
+
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args:
+          - --convention=google
+          - --add-ignore=D100,D104,D105,D107,D103,D212
+        exclude: ^(tests/|alembic/|scripts/)
+        language_version: python3
+
+  # ═══════════════════════════════════════════════════════════
+  # COMMIT MESSAGE CHECKS
+  # ═══════════════════════════════════════════════════════════
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.3.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        pass_filenames: true
+        args: []
+
+# ═══════════════════════════════════════════════════════════
+# GLOBAL CONFIGURATION
+# ═══════════════════════════════════════════════════════════
+default_language_version:
+  python: python3
+
+default_install_hook_types: [pre-commit, commit-msg]
+minimum_pre_commit_version: "3.0.0"
+
+fail_fast: false
+
+exclude: |
+  (?x)^(
+      \.git/|
+      \.venv/|
+      venv/|
+      \.mypy_cache/|
+      \.pytest_cache/|
+      \.ruff_cache/|
+      __pycache__/|
+      \.eggs/|
+      build/|
+      dist/|
+      htmlcov/|
+      \.coverage|
+      coverage\.xml
+  )

@@ -41,7 +41,7 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create database session for tests."""
     # Create tables
@@ -57,7 +57,7 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture()
+@pytest.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create test client."""
 
@@ -67,7 +67,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_db] = override_get_db
 
     async with AsyncClient(
-        transport=ASGITransport(app=app),  # type: ignore[arg-type]
+        transport=ASGITransport(app=app),
         base_url="http://test",
     ) as ac:
         yield ac
@@ -75,7 +75,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides.clear()
 
 
-@pytest.fixture()
+@pytest.fixture
 async def test_user(db_session: AsyncSession) -> User:
     """Create a test user."""
     user = User(
@@ -93,7 +93,7 @@ async def test_user(db_session: AsyncSession) -> User:
     return user
 
 
-@pytest.fixture()
+@pytest.fixture
 async def test_admin(db_session: AsyncSession) -> User:
     """Create a test admin user."""
     admin = User(
@@ -111,25 +111,25 @@ async def test_admin(db_session: AsyncSession) -> User:
     return admin
 
 
-@pytest.fixture()
+@pytest.fixture
 def user_token(test_user: User) -> str:
     """Create access token for test user."""
     return create_access_token(subject=test_user.id)
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin_token(test_admin: User) -> str:
     """Create access token for test admin."""
     return create_access_token(subject=test_admin.id)
 
 
-@pytest.fixture()
+@pytest.fixture
 def auth_headers(user_token: str) -> dict[str, str]:
     """Create authorization headers for test user."""
     return {"Authorization": f"Bearer {user_token}"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin_headers(admin_token: str) -> dict[str, str]:
     """Create authorization headers for test admin."""
     return {"Authorization": f"Bearer {admin_token}"}

@@ -1,7 +1,7 @@
 """Prometheus metrics for monitoring."""
 
 import time
-from typing import Callable
+from collections.abc import Awaitable, Callable
 
 import structlog
 from prometheus_client import Counter, Gauge, Histogram, generate_latest
@@ -62,7 +62,9 @@ ERROR_COUNT = Counter(
 class PrometheusMiddleware(BaseHTTPMiddleware):
     """Middleware to collect Prometheus metrics."""
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:  # type: ignore[override, type-arg]
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """Process request and collect metrics."""
         if not settings.METRICS_ENABLED:
             return await call_next(request)
@@ -82,7 +84,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
         try:
             # Process request
-            response = await call_next(request)
+            response: Response = await call_next(request)
 
             # Record duration
             duration = time.time() - start_time
@@ -104,10 +106,11 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             ACTIVE_CONNECTIONS.dec()
 
 
-async def metrics_endpoint() -> Response:
+def metrics_endpoint() -> Response:
     """Expose Prometheus metrics endpoint."""
+    metrics_data = generate_latest()
     return Response(
-        content=generate_latest(),
+        content=metrics_data,
         media_type="text/plain",
     )
 

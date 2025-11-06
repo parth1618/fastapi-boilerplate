@@ -46,6 +46,7 @@ A fully functional FastAPI application that includes:
 ### What Problem Does It Solve?
 
 Starting a new FastAPI project from scratch requires:
+
 - Setting up authentication and authorization
 - Configuring database connections and migrations
 - Implementing logging and monitoring
@@ -91,16 +92,19 @@ Unlike many boilerplates, this is **100% production-ready code** that you can de
 ### 🔐 Authentication & Authorization
 
 **JWT-Based Authentication**
+
 - Access tokens (30 min default) + Refresh tokens (7 days default)
 - Secure token generation and validation
 - Token refresh mechanism to avoid re-login
 
 **Role-Based Access Control (RBAC)**
+
 - User roles: `admin`, `user`, custom roles
 - Decorator-based permission checks
 - Row-level permissions support
 
 **Security Best Practices**
+
 - Argon2id password hashing (OWASP recommended)
 - Configurable hash complexity (memory, time, parallelism)
 - Account lockout after failed attempts
@@ -109,11 +113,13 @@ Unlike many boilerplates, this is **100% production-ready code** that you can de
 ### 🏗️ Architecture & Design
 
 **Clean Architecture**
+
 ```
 API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchemy) → Database
 ```
 
 **Design Patterns**
+
 - **Repository Pattern** - Clean data access abstraction
 - **Dependency Injection** - Loose coupling via FastAPI's DI system
 - **Factory Pattern** - Object creation abstraction
@@ -122,6 +128,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - **Retry Pattern** - Automatic failure recovery
 
 **SOLID Principles**
+
 - Single Responsibility - Each module has one purpose
 - Open/Closed - Open for extension, closed for modification
 - Liskov Substitution - Subtypes are substitutable
@@ -131,24 +138,28 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 🗄️ Database & Persistence
 
 **Async SQLAlchemy 2.0**
+
 - Full async/await support
 - Type-safe query building
 - Relationship management
 - Transaction support
 
 **PostgreSQL**
+
 - ACID compliance
 - Advanced indexing
 - JSON support
 - Full-text search ready
 
 **Alembic Migrations**
+
 - Version-controlled schema changes
 - Auto-generate migrations from models
 - Upgrade/downgrade support
 - Production-safe migrations
 
 **Connection Management**
+
 - Connection pooling (5-10 connections)
 - Pool pre-ping for stale connection detection
 - Configurable pool size and overflow
@@ -157,18 +168,21 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### ⚡ Caching & Performance
 
 **Redis Integration**
+
 - High-performance in-memory caching
 - Configurable TTL (Time To Live)
 - Cache invalidation strategies
 - Distributed caching support
 
 **Caching Features**
+
 - Decorator-based caching (`@cached`)
 - Automatic key generation
 - Cache hit/miss tracking
 - Cache statistics
 
 **Performance Optimizations**
+
 - Async operations throughout
 - Database query optimization
 - Response compression
@@ -177,24 +191,28 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 🚦 API Design
 
 **RESTful Architecture**
+
 - Standard HTTP methods (GET, POST, PUT, DELETE)
 - Proper status codes (200, 201, 400, 401, 404, 500)
 - Resource-based URLs
 - Hypermedia support ready
 
 **Request/Response Handling**
+
 - Pydantic v2 validation
 - Automatic serialization/deserialization
 - Custom validators
 - Error response standardization
 
 **API Features**
+
 - Pagination (page, page_size)
 - Filtering and sorting
 - Field selection
 - API versioning (/api/v1, /api/v2)
 
 **OpenAPI Documentation**
+
 - Auto-generated from code
 - Interactive Swagger UI at `/docs`
 - ReDoc alternative at `/redoc`
@@ -203,6 +221,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 📊 Observability & Monitoring
 
 **Structured Logging**
+
 - JSON-formatted logs
 - Request ID correlation
 - Contextual information
@@ -210,6 +229,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - User action tracking
 
 **Distributed Tracing (OpenTelemetry)**
+
 - Trace HTTP requests end-to-end
 - Database query tracing
 - Redis operation tracing
@@ -217,6 +237,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Jaeger UI visualization
 
 **Metrics (Prometheus)**
+
 - Request count by endpoint and status
 - Request duration histograms
 - Active connections gauge
@@ -225,6 +246,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Custom business metrics
 
 **Health Checks**
+
 - `/health` - Detailed system health (DB, Redis, dependencies)
 - `/ready` - Kubernetes readiness probe
 - Liveness probe support
@@ -233,6 +255,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 🛡️ Security & Resilience
 
 **Security Headers**
+
 - CORS configuration
 - Content Security Policy ready
 - X-Frame-Options
@@ -240,6 +263,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Strict-Transport-Security
 
 **Rate Limiting**
+
 - Per-user rate limits
 - Per-IP rate limits
 - Sliding window algorithm
@@ -247,6 +271,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Configurable limits (100 req/min default)
 
 **Input Validation**
+
 - Pydantic schema validation
 - SQL injection prevention (ORM)
 - XSS protection
@@ -254,6 +279,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Content-type validation
 
 **Resilience Patterns**
+
 - Circuit Breaker - Prevents cascading failures
 - Retry Logic - Exponential backoff with jitter
 - Timeout Configuration - Prevent hanging requests
@@ -262,6 +288,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 🧪 Testing & Quality
 
 **Test Coverage**
+
 - Unit tests for business logic
 - Integration tests for APIs
 - Async test support (pytest-asyncio)
@@ -269,12 +296,14 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - 85%+ code coverage
 
 **Code Quality Tools**
+
 - **Ruff** - Fast Python linter and formatter
 - **MyPy** - Static type checking (strict mode)
 - **pre-commit** - Git hooks for quality checks
 - **pytest** - Modern testing framework
 
 **CI/CD Pipeline**
+
 - Automated testing on PR
 - Code quality checks
 - Security scanning
@@ -284,6 +313,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 ### 🐳 DevOps & Deployment
 
 **Docker Support**
+
 - Multi-stage Dockerfile
 - Optimized image size (~180MB)
 - Non-root user
@@ -291,6 +321,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Production-ready
 
 **Docker Compose**
+
 - Complete development environment
 - PostgreSQL, Redis, Jaeger, Prometheus
 - Network configuration
@@ -298,6 +329,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - One-command startup
 
 **Kubernetes Ready**
+
 - Health probes configured
 - ConfigMap support
 - Secret management
@@ -305,6 +337,7 @@ API Layer (FastAPI) → Service Layer (Business Logic) → Data Layer (SQLAlchem
 - Rolling updates support
 
 **Cloud Agnostic**
+
 - Deploy to AWS, GCP, Azure
 - Container registry compatible
 - Environment-based configuration
@@ -636,6 +669,7 @@ fastapi-boilerplate/
 **Purpose**: Handles JWT token generation, validation, and password hashing.
 
 **Key Functions**:
+
 ```python
 create_access_token(subject: str) -> str
 create_refresh_token(subject: str) -> str
@@ -645,6 +679,7 @@ get_password_hash(password: str) -> str
 ```
 
 **Features**:
+
 - JWT with HS256 algorithm
 - Configurable token expiration
 - Secure password hashing (Argon2id)
@@ -655,6 +690,7 @@ get_password_hash(password: str) -> str
 **Purpose**: Provides async database sessions with proper lifecycle management.
 
 **Key Components**:
+
 ```python
 engine: AsyncEngine                     # Async database engine
 AsyncSessionLocal: async_sessionmaker   # Session factory
@@ -662,6 +698,7 @@ get_db() -> AsyncSession               # Dependency for routes
 ```
 
 **Features**:
+
 - Connection pooling
 - Automatic commit/rollback
 - Async context managers
@@ -672,6 +709,7 @@ get_db() -> AsyncSession               # Dependency for routes
 **Purpose**: Encapsulates business logic separate from API routes.
 
 **Example: AuthService**:
+
 ```python
 class AuthService:
     async def register_user(data: UserCreate) -> User
@@ -680,6 +718,7 @@ class AuthService:
 ```
 
 **Benefits**:
+
 - Testable business logic
 - Reusable across endpoints
 - Clear separation of concerns
@@ -690,6 +729,7 @@ class AuthService:
 **Purpose**: Provides decorator-based caching with Redis backend.
 
 **Usage**:
+
 ```python
 @cached(ttl=300, key_prefix="user_items")
 async def get_user_items(user_id: int) -> list:
@@ -698,6 +738,7 @@ async def get_user_items(user_id: int) -> list:
 ```
 
 **Features**:
+
 - Automatic key generation
 - Configurable TTL
 - Cache invalidation
@@ -706,6 +747,7 @@ async def get_user_items(user_id: int) -> list:
 ### 5. Middleware Stack
 
 **Request Processing Order**:
+
 1. **RequestIDMiddleware** - Adds unique ID to each request
 2. **LoggingMiddleware** - Logs request/response details
 3. **PrometheusMiddleware** - Collects metrics
@@ -715,6 +757,7 @@ async def get_user_items(user_id: int) -> list:
 ### 6. Resilience Patterns (`app/core/resilience.py`)
 
 **Circuit Breaker**:
+
 ```python
 @with_circuit_breaker(failure_threshold=5, recovery_timeout=60)
 async def call_external_service():
@@ -723,6 +766,7 @@ async def call_external_service():
 ```
 
 **Retry Logic**:
+
 ```python
 @with_retry(max_attempts=3, wait_multiplier=2)
 async def unreliable_operation():
@@ -733,21 +777,24 @@ async def unreliable_operation():
 ### 7. Observability Integration
 
 **Structured Logging**:
+
 ```python
-logger.info("user_action", 
-    user_id=user.id, 
-    action="login", 
+logger.info("user_action",
+    user_id=user.id,
+    action="login",
     ip=request.client.host
 )
 ```
 
 **Metrics**:
+
 ```python
 REQUEST_COUNT.labels(method="GET", endpoint="/users/").inc()
 REQUEST_DURATION.labels(method="GET", endpoint="/users/").observe(0.123)
 ```
 
 **Tracing**:
+
 - Automatic HTTP request tracing
 - Database query tracing
 - Custom span creation support
@@ -780,6 +827,7 @@ open http://localhost:8000/docs
 For comprehensive setup instructions, see **[SETUP.md](SETUP.md)**.
 
 Topics covered:
+
 - Prerequisites installation
 - Docker vs local development
 - Environment configuration
@@ -918,6 +966,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### Structured Logging
 
 **Log Format** (JSON):
+
 ```json
 {
   "timestamp": "2025-01-03T10:30:45.123Z",
@@ -931,6 +980,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ```
 
 **What Gets Logged**:
+
 - All HTTP requests/responses
 - Database queries (in DEBUG mode)
 - Authentication attempts
@@ -942,6 +992,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 **Access**: http://localhost:16686
 
 **What Gets Traced**:
+
 - HTTP request lifecycle
 - Database query execution
 - Redis cache operations
@@ -949,6 +1000,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 - Service-to-service communication
 
 **Trace Information**:
+
 - Request duration
 - Operation hierarchy
 - Error details
@@ -972,6 +1024,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 | `fastapi_errors_total` | Counter | Error count by type and endpoint |
 
 **Metric Visualization**:
+
 - Grafana dashboards (can be integrated)
 - Prometheus built-in UI
 - Custom dashboards
@@ -979,10 +1032,11 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### Health Checks
 
 **Detailed Health Check** (`/health`):
+
 ```json
 {
   "status": "healthy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "environment": "development",
   "database": "healthy",
   "redis": "healthy",
@@ -991,6 +1045,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ```
 
 **Readiness Probe** (`/ready`):
+
 ```json
 {
   "status": "ready"
@@ -998,6 +1053,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ```
 
 **Use Cases**:
+
 - Kubernetes liveness/readiness probes
 - Load balancer health checks
 - Monitoring system integration
@@ -1010,12 +1066,14 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### Clean Architecture
 
 **Layered Separation**:
+
 - **API Layer** - HTTP concerns only
 - **Service Layer** - Business logic
 - **Data Layer** - Database operations
 - **Domain Layer** - Core business entities
 
 **Benefits**:
+
 - Easy to test each layer independently
 - Business logic independent of framework
 - Database can be swapped without affecting business logic
@@ -1024,25 +1082,30 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### SOLID Principles
 
 **Single Responsibility**:
+
 - Each class/module has one reason to change
 - `AuthService` only handles authentication
 - `UserModel` only represents user data
 
 **Open/Closed**:
+
 - Open for extension via inheritance/composition
 - Closed for modification of existing code
 - Use abstract base classes and protocols
 
 **Liskov Substitution**:
+
 - Subtypes can replace base types
 - All `BaseException` subclasses can be handled uniformly
 
 **Interface Segregation**:
+
 - Small, focused interfaces
 - Clients don't depend on unused methods
 - Dependency injection of specific interfaces
 
 **Dependency Inversion**:
+
 - Depend on abstractions, not concretions
 - Use FastAPI's dependency injection
 - Service layer doesn't know about HTTP
@@ -1067,11 +1130,13 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### Domain-Driven Design (DDD) Ready
 
 **Strategic Design**:
+
 - Clear bounded contexts (Auth, Users, etc.)
 - Ubiquitous language in code
 - Domain models separate from infrastructure
 
 **Tactical Design**:
+
 - Entities (User)
 - Value Objects (Email, Password)
 - Repositories (data access abstraction)
@@ -1088,10 +1153,10 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
         /\
        /  \         E2E Tests (Few)
       /____\        - Full application flow
-     /      \       
+     /      \
     /        \      Integration Tests (Some)
    /__________\     - API endpoints with DB
-  /            \    
+  /            \
  /              \   Unit Tests (Many)
 /________________\  - Business logic, utilities
 ```
@@ -1101,6 +1166,7 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 **Current Coverage**: 85%+
 
 **Coverage Goals**:
+
 - **Critical Paths**: 100% (authentication, authorization)
 - **Business Logic**: 90%+ (services)
 - **API Endpoints**: 85%+ (integration tests)
@@ -1109,18 +1175,21 @@ curl -X GET "http://localhost:8000/api/v1/users/me" \
 ### Test Types
 
 **Unit Tests** (`tests/services/`):
+
 - Test business logic in isolation
 - Mock external dependencies
 - Fast execution (<1s per test)
 - Examples: `test_auth_service.py`
 
 **Integration Tests** (`tests/api/`):
+
 - Test API endpoints with real database
 - Use test database (SQLite in-memory)
 - Verify request/response flow
 - Examples: `test_auth.py`, `test_users.py`
 
 **Fixtures** (`tests/conftest.py`):
+
 - Reusable test components
 - Test database setup
 - Mock users and data
@@ -1148,6 +1217,7 @@ poetry run pytest-watch
 ### Writing Tests
 
 **Example Test**:
+
 ```python
 import pytest
 from httpx import AsyncClient
@@ -1164,7 +1234,7 @@ async def test_user_registration(client: AsyncClient) -> None:
             "full_name": "Test User"
         }
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["email"] == "test@example.com"
@@ -1188,6 +1258,7 @@ feature/my-feature (development)
 ```
 
 **Branch Types**:
+
 - `main` - Production-ready code
 - `develop` - Integration branch
 - `feature/*` - New features
@@ -1198,6 +1269,7 @@ feature/my-feature (development)
 ### Typical Workflow
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/add-user-profiles
    ```
@@ -1208,6 +1280,7 @@ feature/my-feature (development)
    - Update documentation
 
 3. **Run Quality Checks**
+
    ```bash
    make test          # Run tests
    make lint          # Check code quality
@@ -1216,6 +1289,7 @@ feature/my-feature (development)
    ```
 
 4. **Commit Changes**
+
    ```bash
    git add .
    git commit -m "feat: add user profile management"
@@ -1223,6 +1297,7 @@ feature/my-feature (development)
    ```
 
 5. **Push and Create PR**
+
    ```bash
    git push origin feature/add-user-profiles
    # Create Pull Request on GitHub
@@ -1255,6 +1330,7 @@ feature/my-feature (development)
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -1266,6 +1342,7 @@ feature/my-feature (development)
 - `ci`: CI/CD changes
 
 **Examples**:
+
 ```bash
 git commit -m "feat(auth): add password reset functionality"
 git commit -m "fix(users): resolve duplicate email validation"
@@ -1292,6 +1369,7 @@ git commit -m "refactor(services): simplify authentication logic"
 ### Docker Deployment
 
 **Single Container**:
+
 ```bash
 # Build image
 docker build -t fastapi-boilerplate:v1.0.0 .
@@ -1307,6 +1385,7 @@ docker run -d \
 ```
 
 **Docker Compose (Production)**:
+
 ```yaml
 version: '3.8'
 
@@ -1340,6 +1419,7 @@ services:
 ### Kubernetes Deployment
 
 **Deployment Manifest**:
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -1390,6 +1470,7 @@ spec:
 ### Environment-Specific Configuration
 
 **Development** (`.env`):
+
 ```env
 ENVIRONMENT=development
 DEBUG=true
@@ -1398,6 +1479,7 @@ DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/appdb
 ```
 
 **Staging** (`.env.staging`):
+
 ```env
 ENVIRONMENT=staging
 DEBUG=false
@@ -1406,6 +1488,7 @@ DATABASE_URL=postgresql+asyncpg://user:pass@staging-db:5432/appdb
 ```
 
 **Production** (Environment Variables):
+
 ```env
 ENVIRONMENT=production
 DEBUG=false
@@ -1418,17 +1501,20 @@ OTEL_ENABLED=true
 ### Scaling Strategy
 
 **Horizontal Scaling**:
+
 - Run multiple application instances
 - Use load balancer (Nginx, HAProxy, cloud LB)
 - Session data in Redis (stateless app)
 - Database connection pooling
 
 **Vertical Scaling**:
+
 - Increase CPU/memory per instance
 - Tune database connection pool
 - Optimize query performance
 
 **Database Scaling**:
+
 - Read replicas for read-heavy loads
 - Connection pooling
 - Query optimization
@@ -1450,6 +1536,7 @@ OTEL_ENABLED=true
 | `/api/v1/users/` | 50ms | 80ms | 120ms | 500+ |
 
 **Load Test Results**:
+
 - **Concurrent Users**: 1000+
 - **Requests per Second**: 2000+
 - **Error Rate**: <0.1%
@@ -1459,6 +1546,7 @@ OTEL_ENABLED=true
 ### Performance Optimization Tips
 
 **Database**:
+
 - Use appropriate indexes
 - Implement query pagination
 - Use connection pooling
@@ -1466,12 +1554,14 @@ OTEL_ENABLED=true
 - Use eager loading for relationships
 
 **Caching**:
+
 - Cache frequently accessed data
 - Use Redis for session data
 - Implement cache invalidation strategy
 - Set appropriate TTL values
 
 **Application**:
+
 - Use async operations
 - Minimize middleware overhead
 - Optimize serialization
@@ -1479,6 +1569,7 @@ OTEL_ENABLED=true
 - Profile and optimize hot paths
 
 **Infrastructure**:
+
 - Use CDN for static assets
 - Enable HTTP/2
 - Use compression (gzip, brotli)
@@ -1495,27 +1586,35 @@ We welcome contributions from the community! Please read our [Contributing Guide
 
 1. **Fork the Repository**
 2. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
+
 3. **Make Your Changes**
    - Follow code style guidelines
    - Add tests for new features
    - Update documentation
 4. **Run Quality Checks**
+
    ```bash
    make test
    make lint
    make typecheck
    ```
+
 5. **Commit Your Changes**
+
    ```bash
    git commit -m "feat: add amazing feature"
    ```
+
 6. **Push to Your Fork**
+
    ```bash
    git push origin feature/amazing-feature
    ```
+
 7. **Open a Pull Request**
 
 ### Code Style Guidelines
@@ -1663,10 +1762,10 @@ This project is built on the shoulders of giants. Special thanks to:
 | **Observability** | ✅ Complete | Logs, metrics, tracing |
 | **Docker** | ✅ Complete | Multi-stage builds |
 
-**Version**: 1.0.0  
-**Last Updated**: November 5, 2025  
-**Python**: 3.11+  
-**FastAPI**: 0.115+  
+**Version**: 1.1.0
+**Last Updated**: November 6, 2025
+**Python**: 3.11+
+**FastAPI**: 0.115+
 
 ---
 
@@ -1688,6 +1787,7 @@ This boilerplate demonstrates:
 ### Use Cases
 
 Perfect for:
+
 - **Startups** - MVP development
 - **Enterprises** - Production applications
 - **Learning** - Study modern Python backend development
@@ -1720,7 +1820,7 @@ If you find this project helpful:
 
 Made with ❤️ by the FastAPI Boilerplate Team
 
-**FastAPI Boilerplate** • Version 1.0.0 • [MIT License](LICENSE)
+**FastAPI Boilerplate** • Version 1.1.0 • [MIT License](LICENSE)
 
 [Documentation](SETUP.md) • [Contributing](CONTRIBUTING.md) • [Issues](https://github.com/parth1618/fastapi-boilerplate/issues) • [Discussions](https://github.com/parth1618/fastapi-boilerplate/discussions)
 

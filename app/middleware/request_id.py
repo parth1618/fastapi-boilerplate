@@ -1,7 +1,7 @@
 """Request ID middleware for tracing."""
 
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -12,7 +12,11 @@ from starlette.responses import Response
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Middleware to add request ID to all requests."""
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:  # type: ignore[override]
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         """Process request and add request ID."""
         # Get or generate request ID
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
@@ -25,7 +29,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         request.state.request_id = request_id
 
         # Process request
-        response = await call_next(request)
+        response: Response = await call_next(request)
 
         # Add request ID to response headers
         response.headers["X-Request-ID"] = request_id

@@ -37,17 +37,20 @@ Thank you for considering contributing to this project! 🎉
 1. **Fork the repository**
 
 2. **Clone your fork**
+
    ```bash
    git clone https://github.com/parth1618/fastapi-boilerplate.git
    cd fastapi-boilerplate
    ```
 
 3. **Create a branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 4. **Set up development environment**
+
    ```bash
    make install
    make precommit-install
@@ -59,6 +62,7 @@ Thank you for considering contributing to this project! 🎉
    - Update documentation
 
 6. **Run tests and checks**
+
    ```bash
    make test
    make lint
@@ -67,11 +71,12 @@ Thank you for considering contributing to this project! 🎉
    ```
 
 7. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "feat: add amazing feature"
    ```
-   
+
    Use conventional commits:
    - `feat:` - New feature
    - `fix:` - Bug fix
@@ -82,6 +87,7 @@ Thank you for considering contributing to this project! 🎉
    - `chore:` - Maintenance
 
 8. **Push to your fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -120,6 +126,7 @@ Thank you for considering contributing to this project! 🎉
 ### Commit Messages
 
 Good:
+
 ```
 feat: add user profile endpoint
 fix: resolve authentication bug
@@ -127,6 +134,7 @@ docs: update setup instructions
 ```
 
 Bad:
+
 ```
 updated stuff
 fix

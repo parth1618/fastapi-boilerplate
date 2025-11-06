@@ -17,7 +17,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 async def register(user_data: UserCreate, db: DBSession) -> User:
     """Register a new user."""
     auth_service = AuthService(db)
-    return await auth_service.register_user(user_data)
+    return await auth_service.register_user(user_data)  # type: ignore[return-value]  # service returns model, response_model converts to schema
 
 
 @router.post("/login", response_model=Token)

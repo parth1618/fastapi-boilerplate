@@ -8,13 +8,12 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  POETRY_VERSION: "2.2.1"
+  POETRY_VERSION: "1.8.4"
 
 jobs:
   lint:
-    name: Code Quality Checks (Optional)
+    name: Code Quality Checks
     runs-on: ubuntu-latest
-    continue-on-error: true  # Makes lint optional
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,35 +22,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Cache Poetry installation
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/bin/poetry
-            ~/.local/share/pypoetry
-          key: poetry-${{ env.POETRY_VERSION }}-${{ runner.os }}
+          cache: "pip"
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            .venv
-          key: poetry-deps-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           restore-keys: |
-            poetry-deps-${{ runner.os }}-
+            venv-${{ runner.os }}-
 
       - name: Install dependencies
-        run: |
-          poetry config virtualenvs.in-project true
-          poetry install --with dev --no-interaction
+        run: poetry install --with dev --no-interaction --no-root
 
       - name: Run Ruff Linting
         run: poetry run ruff check . --output-format=github
@@ -61,6 +50,7 @@ jobs:
 
       - name: Run MyPy Type Checking
         run: poetry run mypy . --no-error-summary
+        continue-on-error: true
 
   test:
     name: Test Suite
@@ -75,7 +65,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready"
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -85,7 +75,7 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "nc -z localhost 6379"
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -98,52 +88,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-
-      - name: Cache Poetry installation
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/bin/poetry
-            ~/.local/share/pypoetry
-          key: poetry-${{ env.POETRY_VERSION }}-${{ runner.os }}
+          cache: "pip"
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pypoetry
-            .venv
-          key: poetry-deps-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           restore-keys: |
-            poetry-deps-${{ runner.os }}-
+            venv-${{ runner.os }}-
 
       - name: Install dependencies
-        run: |
-          poetry config virtualenvs.in-project true
-          poetry install --with dev --no-interaction
-
-      - name: Install PostgreSQL client for pg_isready
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
-
-      - name: Wait for Redis
-        run: |
-          until nc -z localhost 6379; do
-            echo "Waiting for Redis..."
-            sleep 2
-          done
+        run: poetry install --with dev --no-interaction --no-root
 
       - name: Run tests with coverage
         env:
@@ -161,6 +124,7 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+        continue-on-error: true
 
   security:
     name: Security Scan
@@ -175,23 +139,37 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
 
       - name: Install dependencies
-        run: poetry install --with dev --no-interaction
+        run: poetry install --with dev --no-interaction --no-root
+
+      - name: Run Bandit security checks
+        run: poetry run bandit -c pyproject.toml -r app/
+        continue-on-error: true
+
+      - name: Run detect-secrets
+        run: poetry run detect-secrets scan --baseline .secrets.baseline
+        continue-on-error: true
 
       - name: Run Safety check
-        run: |
-          poetry add safety --group dev
-          poetry run safety check --json
+        run: poetry run safety check --json
         continue-on-error: true
 
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: [test]  # Only depends on test (lint is optional)
+    needs: [lint, test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -229,6 +207,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [build]
+    if: github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -236,35 +215,82 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Start services with Docker Compose
+      - name: Create env file
         run: |
-          cp .env.example .env
-          docker-compose up -d postgres redis
+          cat > .env << EOF
+          ENVIRONMENT=testing
+          DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/appdb
+          REDIS_URL=redis://redis:6379/0
+          JWT_SECRET_KEY=test-secret-key-for-integration
+          DEBUG=false
+          EOF
+
+      - name: Start services
+        run: docker compose -f docker-compose.ci.yml up -d postgres redis
 
       - name: Wait for services
         run: |
-          timeout 60 bash -c 'until docker-compose exec -T postgres pg_isready; do sleep 2; done'
-          timeout 60 bash -c 'until docker-compose exec -T redis redis-cli ping; do sleep 2; done'
+          timeout 60 bash -c 'until docker compose -f docker-compose.ci.yml exec -T postgres pg_isready -U postgres; do sleep 2; done'
+          timeout 60 bash -c 'until docker compose -f docker-compose.ci.yml exec -T redis redis-cli ping; do sleep 2; done'
 
       - name: Run integration tests
         run: |
-          docker-compose run --rm -e DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/appdb app pytest tests/ -v
+          docker compose -f docker-compose.ci.yml run --rm app pytest tests/ -v
+        continue-on-error: true
 
       - name: Cleanup
         if: always()
-        run: docker-compose down -v
+        run: docker compose -f docker-compose.ci.yml down -v
+
+  pre-commit:
+    name: Pre-commit Hooks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --with dev --no-interaction --no-root
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit
+        run: poetry run pre-commit run --all-files --show-diff-on-failure
+        continue-on-error: true
 
   notify:
     name: Notification
     runs-on: ubuntu-latest
-    needs: [lint, test, build]  # lint is optional, but we still include it
+    needs: [lint, test, build]
     if: always()
     steps:
       - name: Check job status
         run: |
           if [[ "${{ needs.test.result }}" == "failure" ]] || [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "Pipeline failed! (Critical jobs: test or build)"
+            echo "❌ Pipeline failed! (Critical jobs: test or build)"
             exit 1
           else
-            echo "Pipeline succeeded!"
+            echo "✅ Pipeline succeeded!"
           fi

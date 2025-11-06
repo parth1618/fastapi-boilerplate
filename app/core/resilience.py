@@ -1,10 +1,10 @@
 """Circuit breaker and retry logic for resilience."""
 
+import asyncio
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, cast
 
 import structlog
-from circuitbreaker import circuit
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -16,13 +16,15 @@ from app.core.config import settings
 
 logger = structlog.get_logger()
 
+F = TypeVar("F", bound=Callable[..., Any])
+
 
 def with_retry(
     max_attempts: int | None = None,
     wait_multiplier: int | None = None,
     wait_max: int | None = None,
     retry_on: tuple[type[Exception], ...] = (Exception,),
-) -> Callable:  # type: ignore[type-arg]
+) -> Callable[[F], F]:
     """
     Decorator to add retry logic to a function.
 
@@ -33,7 +35,7 @@ def with_retry(
         retry_on: Tuple of exceptions to retry on
     """
 
-    def decorator(func: Callable) -> Callable:  # type: ignore[type-arg, type-arg]
+    def decorator(func: F) -> F:
         if not settings.RETRY_ENABLED:
             return func
 
@@ -41,46 +43,52 @@ def with_retry(
         wait_multiplier_val = wait_multiplier or settings.RETRY_WAIT_EXPONENTIAL_MULTIPLIER
         wait_max_val = wait_max or settings.RETRY_WAIT_EXPONENTIAL_MAX
 
-        @retry(
-            stop=stop_after_attempt(max_attempts_val),
-            wait=wait_exponential(multiplier=wait_multiplier_val, max=wait_max_val),
-            retry=retry_if_exception_type(retry_on),
-            reraise=True,
-        )
         @functools.wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                return await func(*args, **kwargs)
-            except Exception as e:
-                logger.warning(
-                    "retry_attempt",
-                    function=func.__name__,
-                    error=str(e),
-                )
-                raise
+            @retry(
+                stop=stop_after_attempt(max_attempts_val),
+                wait=wait_exponential(multiplier=wait_multiplier_val, max=wait_max_val),
+                retry=retry_if_exception_type(retry_on),
+                reraise=True,
+            )
+            async def _retry_wrapper() -> Any:
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    logger.warning(
+                        "retry_attempt",
+                        function=func.__name__,
+                        error=str(e),
+                    )
+                    raise
 
-        @retry(
-            stop=stop_after_attempt(max_attempts_val),
-            wait=wait_exponential(multiplier=wait_multiplier_val, max=wait_max_val),
-            retry=retry_if_exception_type(retry_on),
-            reraise=True,
-        )
+            return await _retry_wrapper()
+
         @functools.wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                logger.warning(
-                    "retry_attempt",
-                    function=func.__name__,
-                    error=str(e),
-                )
-                raise
+            @retry(
+                stop=stop_after_attempt(max_attempts_val),
+                wait=wait_exponential(multiplier=wait_multiplier_val, max=wait_max_val),
+                retry=retry_if_exception_type(retry_on),
+                reraise=True,
+            )
+            def _retry_wrapper() -> Any:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    logger.warning(
+                        "retry_attempt",
+                        function=func.__name__,
+                        error=str(e),
+                    )
+                    raise
+
+            return _retry_wrapper()
 
         # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
-            return async_wrapper
-        return sync_wrapper
+            return cast(F, async_wrapper)
+        return cast(F, sync_wrapper)
 
     return decorator
 
@@ -89,7 +97,7 @@ def with_circuit_breaker(
     failure_threshold: int | None = None,
     recovery_timeout: int | None = None,
     expected_exception: type[Exception] = Exception,
-) -> Callable:  # type: ignore[type-arg]
+) -> Callable[[F], F]:
     """
     Decorator to add circuit breaker pattern to a function.
 
@@ -99,22 +107,31 @@ def with_circuit_breaker(
         expected_exception: Exception type that triggers circuit breaker
     """
 
-    def decorator(func: Callable) -> Callable:  # type: ignore[type-arg, type-arg]
+    def decorator(func: F) -> F:
         if not settings.CIRCUIT_BREAKER_ENABLED:
             return func
 
         failure_threshold_val = failure_threshold or settings.CIRCUIT_BREAKER_FAILURE_THRESHOLD
         recovery_timeout_val = recovery_timeout or settings.CIRCUIT_BREAKER_RECOVERY_TIMEOUT
 
-        @circuit(
-            failure_threshold=failure_threshold_val,
-            recovery_timeout=recovery_timeout_val,
-            expected_exception=expected_exception,
-        )
+        # Import circuit breaker here to avoid issues with typing
+        try:
+            from circuitbreaker import CircuitBreaker  # type: ignore[import-untyped]
+
+            breaker = CircuitBreaker(
+                failure_threshold=failure_threshold_val,
+                recovery_timeout=recovery_timeout_val,
+                expected_exception=expected_exception,
+            )
+        except ImportError:
+            # If circuit breaker not available, return function as-is
+            logger.warning("circuitbreaker module not available")
+            return func
+
         @functools.wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
-                return await func(*args, **kwargs)
+                return await breaker.call_async(func, *args, **kwargs)
             except Exception as e:
                 logger.error(
                     "circuit_breaker_failure",
@@ -123,15 +140,10 @@ def with_circuit_breaker(
                 )
                 raise
 
-        @circuit(
-            failure_threshold=failure_threshold_val,
-            recovery_timeout=recovery_timeout_val,
-            expected_exception=expected_exception,
-        )
         @functools.wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
-                return func(*args, **kwargs)
+                return breaker.call(func, *args, **kwargs)
             except Exception as e:
                 logger.error(
                     "circuit_breaker_failure",
@@ -142,8 +154,8 @@ def with_circuit_breaker(
 
         # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
-            return async_wrapper
-        return sync_wrapper
+            return cast(F, async_wrapper)
+        return cast(F, sync_wrapper)
 
     return decorator
 
@@ -152,7 +164,7 @@ def resilient(
     max_attempts: int | None = None,
     circuit_failure_threshold: int | None = None,
     circuit_recovery_timeout: int | None = None,
-) -> Callable:  # type: ignore[type-arg]
+) -> Callable[[F], F]:
     """
     Decorator combining both retry and circuit breaker patterns.
 
@@ -162,16 +174,12 @@ def resilient(
         circuit_recovery_timeout: Circuit breaker recovery timeout
     """
 
-    def decorator(func: Callable) -> Callable:  # type: ignore[type-arg, type-arg]
+    def decorator(func: F) -> F:
         # Apply circuit breaker first, then retry
-        func = with_circuit_breaker(
+        func_with_cb = with_circuit_breaker(
             failure_threshold=circuit_failure_threshold,
             recovery_timeout=circuit_recovery_timeout,
         )(func)
-        return with_retry(max_attempts=max_attempts)(func)
+        return with_retry(max_attempts=max_attempts)(func_with_cb)
 
     return decorator
-
-
-# Import asyncio at the end to avoid circular imports
-import asyncio  # noqa: E402

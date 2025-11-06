@@ -2,11 +2,11 @@
 
 import functools
 import hashlib
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, cast
 
 import structlog
-from aiocache import Cache
-from aiocache.serializers import JsonSerializer
+from aiocache import Cache  # type: ignore[import-untyped]
+from aiocache.serializers import JsonSerializer  # type: ignore[import-untyped]
 
 from app.core.config import settings
 
@@ -25,6 +25,8 @@ cache = Cache(
     serializer=JsonSerializer(),
 )
 
+F = TypeVar("F", bound=Callable[..., Any])
+
 
 def generate_cache_key(func_name: str, *args: Any, **kwargs: Any) -> str:
     """Generate a unique cache key based on function name and arguments."""
@@ -36,19 +38,19 @@ def generate_cache_key(func_name: str, *args: Any, **kwargs: Any) -> str:
         if isinstance(arg, (str, int, float, bool)):
             key_parts.append(str(arg))
         else:
-            key_parts.append(hashlib.md5(str(arg).encode()).hexdigest()[:8])
+            key_parts.append(hashlib.md5(str(arg).encode()).hexdigest()[:8])  # nosec
 
     # Add keyword arguments
     for k, v in sorted(kwargs.items()):
         if isinstance(v, (str, int, float, bool)):
             key_parts.append(f"{k}:{v}")
         else:
-            key_parts.append(f"{k}:{hashlib.md5(str(v).encode()).hexdigest()[:8]}")
+            key_parts.append(f"{k}:{hashlib.md5(str(v).encode()).hexdigest()[:8]}")  # nosec
 
     return ":".join(key_parts)
 
 
-def cached(ttl: int | None = None, key_prefix: str | None = None) -> Callable:  # type: ignore[type-arg]
+def cached(ttl: int | None = None, key_prefix: str | None = None) -> Callable[[F], F]:
     """
     Decorator to cache function results.
 
@@ -57,7 +59,7 @@ def cached(ttl: int | None = None, key_prefix: str | None = None) -> Callable:  
         key_prefix: Optional prefix for cache key
     """
 
-    def decorator(func: Callable) -> Callable:  # type: ignore[type-arg, type-arg]
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             if not settings.CACHE_ENABLED:
@@ -89,7 +91,7 @@ def cached(ttl: int | None = None, key_prefix: str | None = None) -> Callable:  
                 # Fall back to executing function without cache
                 return await func(*args, **kwargs)
 
-        return wrapper
+        return cast(F, wrapper)
 
     return decorator
 
@@ -146,7 +148,8 @@ class CacheManager:
     @staticmethod
     async def exists(key: str) -> bool:
         """Check if key exists in cache."""
-        return await cache.exists(key)
+        exists: bool = await cache.exists(key)
+        return exists
 
     @staticmethod
     async def increment(key: str, delta: int = 1) -> int:

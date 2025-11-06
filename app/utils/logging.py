@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from typing import Any
 
 import structlog
 from loguru import logger as loguru_logger
@@ -44,6 +45,6 @@ def setup_logging() -> None:
     )
 
 
-def get_logger(name: str | None = None) -> structlog.BoundLogger:
+def get_logger(name: str | None = None) -> Any:
     """Get a structured logger instance."""
     return structlog.get_logger(name) if name else structlog.get_logger()

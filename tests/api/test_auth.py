@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from app.models.user import User
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_register_user(client: AsyncClient) -> None:
     """Test user registration."""
     response = await client.post(
@@ -25,7 +25,7 @@ async def test_register_user(client: AsyncClient) -> None:
     assert "id" in data
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_register_duplicate_email(client: AsyncClient, test_user: User) -> None:
     """Test registration with duplicate email."""
     response = await client.post(
@@ -39,7 +39,7 @@ async def test_register_duplicate_email(client: AsyncClient, test_user: User) ->
     assert response.status_code == 409
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_login_success(client: AsyncClient, test_user: User) -> None:
     """Test successful login."""
     response = await client.post(
@@ -56,7 +56,7 @@ async def test_login_success(client: AsyncClient, test_user: User) -> None:
     assert data["token_type"] == "bearer"
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_login_invalid_password(client: AsyncClient, test_user: User) -> None:
     """Test login with invalid password."""
     response = await client.post(
@@ -69,7 +69,7 @@ async def test_login_invalid_password(client: AsyncClient, test_user: User) -> N
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_login_nonexistent_user(client: AsyncClient) -> None:
     """Test login with nonexistent user."""
     response = await client.post(
@@ -82,7 +82,7 @@ async def test_login_nonexistent_user(client: AsyncClient) -> None:
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_refresh_token(client: AsyncClient, test_user: User) -> None:
     """Test token refresh."""
     # First login to get tokens

@@ -36,11 +36,12 @@ def create_access_token(subject: str | int, expires_delta: timedelta | None = No
         )
 
     to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
-    return jwt.encode(
+    access_token: str = jwt.encode(
         to_encode,
         settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
     )
+    return access_token
 
 
 def create_refresh_token(subject: str | int) -> str:
@@ -54,11 +55,12 @@ def create_refresh_token(subject: str | int) -> str:
     """
     expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode = {"exp": expire, "sub": str(subject), "type": "refresh"}
-    return jwt.encode(
+    refresh_token: str = jwt.encode(
         to_encode,
         settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
     )
+    return refresh_token
 
 
 def verify_token(token: str) -> dict[str, Any]:
@@ -74,11 +76,12 @@ def verify_token(token: str) -> dict[str, Any]:
         ValueError: If token is expired or invalid
     """
     try:
-        return jwt.decode(
+        payload: dict[str, Any] = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
+        return payload
     except jwt.ExpiredSignatureError as e:
         raise ValueError("Token has expired") from e
     except jwt.InvalidTokenError as e:

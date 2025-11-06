@@ -16,7 +16,7 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"  # Changed from 8888 to avoid conflict with Jaeger
     namespace: "fastapi"
-  
+
   # Export traces to Jaeger using OTLP protocol
   otlp:
     endpoint: "fastapi_jaeger:4317"
@@ -33,7 +33,7 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [prometheus]
-  
+
   telemetry:
     logs:
       level: info

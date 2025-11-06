@@ -34,7 +34,7 @@ async def init_db(db: AsyncSession) -> None:
         logger.info("admin_user_already_exists")
 
 
-async def main():
+async def main() -> None:
     from app.db.session import AsyncSessionLocal
 
     """Run database initialization."""

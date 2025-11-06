@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # API
     API_V1_PREFIX: str = "/api/v1"
     PROJECT_NAME: str = "FastAPI Boilerplate"
-    VERSION: str = "1.0.0"
+    VERSION: str = "1.1.0"
 
     # Database
     DATABASE_URL: PostgresDsn
@@ -102,4 +102,4 @@ class Settings(BaseSettings):
         return str(self.DATABASE_URL).replace("+asyncpg", "")
 
 
-settings = Settings()  # type: ignore[call-arg]
+settings = Settings()

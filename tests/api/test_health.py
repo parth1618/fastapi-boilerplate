@@ -4,7 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_health_check(client: AsyncClient) -> None:
     """Test health check endpoint."""
     response = await client.get("/api/v1/health")
@@ -15,7 +15,7 @@ async def test_health_check(client: AsyncClient) -> None:
     assert "database" in data
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_readiness_check(client: AsyncClient) -> None:
     """Test readiness check endpoint."""
     response = await client.get("/api/v1/ready")
@@ -24,7 +24,7 @@ async def test_readiness_check(client: AsyncClient) -> None:
     assert data["status"] == "ready"
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_root_endpoint(client: AsyncClient) -> None:
     """Test root endpoint."""
     response = await client.get("/")
