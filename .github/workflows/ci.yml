@@ -160,7 +160,7 @@ jobs:
         run: poetry run detect-secrets scan --baseline .secrets.baseline
 
       - name: Run Safety check
-        run: poetry run safety check --json
+        run: poetry run safety scan --json
 
   build:
     name: Build Docker Image
