@@ -15,6 +15,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
     networks:
       - backend
 
@@ -25,11 +33,17 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     networks:
       - backend
 
@@ -41,6 +55,11 @@ services:
       - "14268:14268"  # Collector HTTP
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
     networks:
       - backend
 
@@ -50,12 +69,17 @@ services:
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yml
     ports:
-      - "4319:4317"  # OTLP gRPC (for FastAPI app running on host)
+      - "4319:4317"  # OTLP gRPC
       - "4320:4318"  # OTLP HTTP
-      - "8889:8889"  # Prometheus metrics endpoint (changed from 8888)
+      - "8889:8889"  # Prometheus metrics
     command: ["--config=/etc/otelcol-contrib/config.yml"]
     depends_on:
       - jaeger
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
     networks:
       - backend
 
@@ -70,8 +94,15 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
     depends_on:
       - otel-collector
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
     networks:
       - backend
 
@@ -79,15 +110,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     container_name: fastapi_app
     env_file: .env
     environment:
-      # Override specific variables for Docker network communication
       DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/appdb
       REDIS_URL: redis://redis:6379/0
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
+      ENVIRONMENT: development
+      DEBUG: "false"
     ports:
       - "8000:8000"
     depends_on:
@@ -102,9 +135,21 @@ services:
         alembic upgrade head &&
         gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000 --workers 4 --timeout 120
       "
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     networks:
       - backend
-    restart: unless-stopped
+    restart: on-failure
 
 networks:
   backend:

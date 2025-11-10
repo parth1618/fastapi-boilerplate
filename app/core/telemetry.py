@@ -61,9 +61,17 @@ def setup_telemetry(app: FastAPI) -> None:
         FastAPIInstrumentor.instrument_app(app)
 
         # Instrument SQLAlchemy
-        from app.db.session import engine
+        from app.db.session import db_manager
 
-        SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
+        # Initialize database manager
+        db_manager.init()
+
+        # Test database connection
+        if db_manager.engine is None:
+            logger.error("database_engine_not_initialized")
+            raise RuntimeError("Database engine not initialized")
+
+        SQLAlchemyInstrumentor().instrument(engine=db_manager.engine.sync_engine)
 
         # Instrument Redis
         RedisInstrumentor().instrument()

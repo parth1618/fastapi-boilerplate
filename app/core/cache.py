@@ -38,14 +38,14 @@ def generate_cache_key(func_name: str, *args: Any, **kwargs: Any) -> str:
         if isinstance(arg, (str, int, float, bool)):
             key_parts.append(str(arg))
         else:
-            key_parts.append(hashlib.md5(str(arg).encode()).hexdigest()[:8])  # nosec
+            key_parts.append(hashlib.sha256(str(arg).encode()).hexdigest()[:16])
 
     # Add keyword arguments
     for k, v in sorted(kwargs.items()):
         if isinstance(v, (str, int, float, bool)):
             key_parts.append(f"{k}:{v}")
         else:
-            key_parts.append(f"{k}:{hashlib.md5(str(v).encode()).hexdigest()[:8]}")  # nosec
+            key_parts.append(f"{k}:{hashlib.sha256(str(v).encode()).hexdigest()[:16]}")
 
     return ":".join(key_parts)
 

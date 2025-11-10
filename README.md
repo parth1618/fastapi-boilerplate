@@ -1522,6 +1522,16 @@ OTEL_ENABLED=true
 
 ---
 
+## CI/CD Notes
+
+### Safety Scan
+The safety vulnerability scan requires a `SAFETY_API_KEY` secret. To enable:
+1. Sign up at https://safetycli.com
+2. Add `SAFETY_API_KEY` to GitHub repository secrets
+3. Uncomment the safety_scan.yml workflow
+
+---
+
 ## 📈 Performance
 
 ### Benchmarks

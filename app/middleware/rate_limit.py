@@ -22,7 +22,11 @@ def get_rate_limit_key(request: Request) -> str:
 # Initialize rate limiter
 limiter = Limiter(
     key_func=get_rate_limit_key,
-    default_limits=[f"{settings.RATE_LIMIT_PER_MINUTE}/minute"],
+    default_limits=[
+        f"{settings.RATE_LIMIT_PER_MINUTE}/minute",
+        f"{settings.RATE_LIMIT_PER_HOUR}/hour",
+        f"{settings.RATE_LIMIT_PER_DAY}/day",
+    ],
     storage_uri=settings.REDIS_URL,
     enabled=settings.RATE_LIMIT_ENABLED,
 )
