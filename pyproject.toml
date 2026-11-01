@@ -17,17 +17,17 @@ gunicorn = "^23.0.0"
 sqlalchemy = "^2.0.44"
 asyncpg = "^0.30.0"
 alembic = "^1.17.1"
-pyjwt = "^2.10.1"
+pyjwt = "^2.15.0"
 passlib = { extras = ["argon2"], version = "^1.7.4" }
 argon2-cffi = "^25.1.0"
 pydantic = { extras = ["email"], version = "^2.12.3" }
 pydantic-settings = "^2.11.0"
-python-multipart = "^0.0.20"
+python-multipart = "^0.0.31"
 structlog = "^25.5.0"
 loguru = "^0.7.3"
 slowapi = "^0.1.9"
 redis = { extras = ["hiredis"], version = "^6.4.0" }
-python-dotenv = "^1.2.1"
+python-dotenv = "^1.2.2"
 aiosqlite = "^0.21.0"
 opentelemetry-api = "^1.38.0"
 opentelemetry-sdk = "^1.38.0"
@@ -42,7 +42,7 @@ celery = { extras = ["redis"], version = "^5.5.3" }
 prometheus-client = "^0.23.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.4.2"
+pytest = "^9.0.3"
 pytest-asyncio = "^1.2.0"
 httpx = "^0.28.1"
 ruff = "^0.14.3"
